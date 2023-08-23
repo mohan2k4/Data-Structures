@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX_SIZE 100
+struct Stack {
+    int top;
+    char items[MAX_SIZE];
+}
+void initialize(struct Stack *stack) {
+    stack->top = -1;
+}
+int isEmpty(struct Stack *stack) {
+    return stack->top == -1;
+}
+void push(struct Stack *stack, char item) {
+    if (stack->top == MAX_SIZE - 1) {
+        printf("Stack is full.\n");
+    } else {
+        stack->items[++(stack->top)] = item;
+    }
+}
+char pop(struct Stack *stack) {
+    if (isEmpty(stack)) {
+        printf("Stack is empty.\n");
+        return '\0';
+    } else {
+        return stack->items[(stack->top)--];
+    }
+}
+char peek(struct Stack *stack) {
+    if (isEmpty(stack)) {
+        printf("Stack is empty.\n");
+        return '\0';
+    } else {
+        return stack->items[stack->top];
+    }
+}
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+int getPrecedence(char ch) {
+    if (ch == '+' || ch == '-')
+        return 1;
+    else if (ch == '*' || ch == '/')
+        return 2;
+    return 0;
+}
+void infixToPostfix(char infix[], char postfix[]) {
+    struct Stack stack;
+    initialize(&stack);
+    int i, j = 0;
+    for (i = 0; infix[i] != '\0'; i++) {
+        if (isalnum(infix[i])) {
+            postfix[j++] = infix[i];
+        } else if (infix[i] == '(') {
+            push(&stack, infix[i]);
+        } else if (infix[i] == ')') {
+            while (!isEmpty(&stack) && peek(&stack) != '(') {
+                postfix[j++] = pop(&stack);
+            }
+            pop(&stack); 
+        } else if (isOperator(infix[i])) {
+            while (!isEmpty(&stack) && getPrecedence(infix[i]) <= getPrecedence(peek(&stack))) {
+                postfix[j++] = pop(&stack);
+            }
+            push(&stack, infix[i]);
+        }
+    }
+    while (!isEmpty(&stack)) {
+        postfix[j++] = pop(&stack);
+    }
+    postfix[j] = '\0';
+}
+int main() {
+    char infix[MAX_SIZE];
+    char postfix[MAX_SIZE];
+
+    printf("Enter an infix expression: ");
+    gets(infix);
+
+    infixToPostfix(infix, postfix);
+    printf("Postfix expression: %s\n", postfix);
+    return 0;
+}
